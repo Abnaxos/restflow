@@ -1,0 +1,6 @@
+.idea/
+.gradle/
+target/
+out/
+/idea-plugin/idea-sandbox/
+/idea-plugin/idea sandbox/

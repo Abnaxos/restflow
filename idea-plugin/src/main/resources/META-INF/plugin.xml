@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+  <idea-version since-build="191.6183.87"/>
+  <id>net.netconomy.tools.restflow.integrations.idea</id>
+  <name>RESTflow</name>
+  <version>patched-by-gradle</version>
+  <vendor email="r.herzog@netconomy.net" url="https://github.com/netconomy/restflow">NETCONOMY GmbH (Raffael Herzog)</vendor>
+
+  <depends>com.intellij.modules.lang</depends>
+  <depends>org.intellij.groovy</depends>
+
+  <description><![CDATA[
+    <p>Support for running RESTflow files directly from the editor.</p>
+
+    <p>RESTflow is a small Groovy DSL that enables to talk to REST services.</p>
+
+    ]]>
+  </description>
+
+  <application-components>
+    <component>
+      <implementation-class>net.netconomy.tools.restflow.integrations.idea.JarFactory</implementation-class>
+    </component>
+  </application-components>
+
+<!--  <extensions defaultExtensionNs="com.intellij">-->
+<!--    <consoleInputFilterProvider implementation="net.netconomy.tools.restflow.integrations.idea.console.RfConsoleFilterProvider"/>-->
+<!--  </extensions>-->
+
+  <module-components>
+    <component>
+      <implementation-class>net.netconomy.tools.restflow.integrations.idea.ConsoleProcessManager</implementation-class>
+    </component>
+  </module-components>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Groovy" extensions="restflow"/>
+    <additionalTextAttributes scheme="Default" file="colorSchemes/RESTflowDefault.xml"/>
+    <additionalTextAttributes scheme="Darcula" file="colorSchemes/RESTflowDarcula.xml"/>
+    <colorSettingsPage implementation="net.netconomy.tools.restflow.integrations.idea.console.RfColorSettingsPage"/>
+    <editorNotificationProvider implementation="net.netconomy.tools.restflow.integrations.idea.console.RfConsoleEditorHeaderProvider"/>
+    <intentionAction>
+      <className>net.netconomy.tools.restflow.integrations.idea.console.RunScriptIntentionAction</className>
+      <category>RESTflow intentions</category>
+    </intentionAction>
+  </extensions>
+  <extensions defaultExtensionNs="org.intellij.groovy">
+    <scriptTypeDetector implementation="net.netconomy.tools.restflow.integrations.idea.lang.RfScriptTypeDetector"/>
+    <membersContributor implementation="net.netconomy.tools.restflow.integrations.idea.lang.RestflowScriptContributor"/>
+  </extensions>
+</idea-plugin>

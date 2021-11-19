@@ -1,0 +1,4 @@
+rootProject.name = 'restflow'
+
+include 'core', 'frontend'
+include 'idea-plugin'

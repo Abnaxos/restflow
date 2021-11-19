@@ -1,0 +1,76 @@
+import local.GitInfo
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.7'
+    }
+}
+
+def gitInfo = GitInfo.load(project)
+allprojects {
+    ext.gitInfo = gitInfo
+}
+
+allprojects {
+    apply plugin: 'base'
+    apply plugin: 'idea'
+    apply plugin: 'maven-publish'
+
+    group = 'net.netconomy.tools.restflow'
+    version = gitInfo.version
+
+    repositories {mavenCentral()}
+
+    buildDir = 'target'
+
+    archivesBaseName = buildArtifactBaseName(project)
+    idea.module {
+        name = archivesBaseName
+    }
+}
+
+subprojects {
+    apply plugin: 'groovy'
+    //noinspection UnnecessaryQualifiedReference
+    apply plugin: local.DependencySets
+
+    sourceCompatibility = 8
+    targetCompatibility = 8
+
+    ext.enableMavenPublishing = true
+
+    dependencySets {
+        groovy '2.5.8', 'org.codehaus.groovy',
+               'groovy', 'groovy-datetime', 'groovy-nio', 'groovy-templates', 'groovy-xml', 'groovy-json', 'groovy-swing'
+        spock '1.3-groovy-2.5', 'org.spockframework',
+              [name: 'spock-core', configure: {exclude group: 'org.codehaus.groovy'}],
+              [group: 'cglib', name: 'cglib-nodep', version: '3.2.10'],
+              groovy
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    task sourceJar(type: Jar, group: 'build') {
+        archiveClassifier.set 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourceJar
+    }
+
+    ext.additionalPublications = [sourceJar]
+}
+
+def buildArtifactBaseName(Project prj) {
+    if (prj == rootProject) {
+        return 'restflow'
+    } else {
+        return buildArtifactBaseName(prj.parent) + '-' + prj.name
+    }
+}

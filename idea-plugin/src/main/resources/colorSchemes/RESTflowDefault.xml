@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+<list>
+  <option name="RESTFLOW_CONSOLE">
+    <value>
+      <option name="FOREGROUND" value="999999"/>
+      <option name="FONT_TYPE" value="2"/>
+    </value>
+  </option>
+  <option name="RESTFLOW_HTTP_OUT">
+    <value>
+      <option name="BACKGROUND" value="69cdff"/>
+    </value>
+  </option>
+  <option name="RESTFLOW_HTTP_IN_OK">
+    <value>
+      <option name="BACKGROUND" value="92d18f"/>
+    </value>
+  </option>
+  <option name="RESTFLOW_HTTP_IN_ERR">
+    <value>
+      <option name="BACKGROUND" value="ff8661"/>
+    </value>
+  </option>
+  <option name="RESTFLOW_HTTP_IN_WARN">
+    <value>
+      <option name="BACKGROUND" value="ffcd69"/>
+    </value>
+  </option>
+</list>

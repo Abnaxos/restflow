@@ -1,0 +1,22 @@
+dependencies {
+    compile project(':core')
+    compile group: dependencySets.groovy.group, name: 'groovy-console', version: dependencySets.groovy.version
+}
+
+task cleanAllLib(type: Delete) {
+    delete file("$buildDir/lib-all")
+}
+task allLib(type: Copy) {
+    dependsOn cleanAllLib, jar, sourceJar
+    destinationDir = file("$buildDir/lib-all")
+    from configurations.compile
+    from jar
+    from sourceJar
+    from project(':core').sourceJar
+}
+
+task runConsole(type: JavaExec) {
+    dependsOn classes
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'net.netconomy.tools.restflow.console.RestFlowConsole'
+}
