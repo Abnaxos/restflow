@@ -1,3 +1,9 @@
+Project status
+==============
+- Provided as is
+- No active maintanance can be expected
+- No contributions are accepted
+
 RESTflow
 ========
 
