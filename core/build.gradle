@@ -1,5 +1,5 @@
 dependencies {
-    api dependencySets.groovy
+    api libs.groovy
 
     api group: 'commons-codec', name: 'commons-codec', version: '1.10'
     api group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'

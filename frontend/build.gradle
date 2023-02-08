@@ -1,6 +1,10 @@
+libs {
+    groovyConsole(groovy) {lib 'groovy-console'}
+}
+
 dependencies {
     api project(':core')
-    api group: dependencySets.groovy.group, name: 'groovy-console', version: dependencySets.groovy.version
+    api libs.groovyConsole
 }
 
 task cleanAllLib(type: Delete) {

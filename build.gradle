@@ -25,7 +25,6 @@ allprojects {
             return it
         }
     }
-    println "$project.path $version"
     group = 'net.netconomy.tools.restflow'
 
     repositories {mavenCentral()}
@@ -42,7 +41,7 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'groovy'
     //noinspection UnnecessaryQualifiedReference
-    apply plugin: local.DependencySets
+    apply plugin: local.LibsPlugin
 
     java {
         toolchain {
@@ -52,16 +51,29 @@ subprojects {
 
     ext.enableMavenPublishing = true
 
-    dependencySets {
-        groovy '3.0.14', 'org.codehaus.groovy',
-               'groovy', 'groovy-datetime', 'groovy-nio', 'groovy-templates', 'groovy-xml', 'groovy-json', 'groovy-swing'
-        // uncomment for Groovy 4 (just to check that things work):
-        //groovy '4.0.8', 'org.apache.groovy',
-        //       'groovy', 'groovy-datetime', 'groovy-nio', 'groovy-templates', 'groovy-xml', 'groovy-json', 'groovy-swing'
-        spock '1.3-groovy-2.5', 'org.spockframework',
-              [name: 'spock-core', configure: {exclude group: 'org.codehaus.groovy'}],
-              [group: 'cglib', name: 'cglib-nodep', version: '3.2.10'],
-              groovy
+    libs {
+        groovy4 {group 'org.apache.groovy' version '4.0.8'}
+        groovy3 {group 'org.codehaus.groovy' version '3.0.14'}
+        groovy(groovy3) {
+            lib 'groovy'
+            lib 'groovy-datetime'
+            lib 'groovy-nio'
+            lib 'groovy-templates'
+            lib 'groovy-xml'
+            lib 'groovy-json'
+            lib 'groovy-swing' // TODO (2023-02-08) required for password prompt, find better solution
+        }
+        //spock {
+        //    def groovyMajor = (~/^(\d+\.\d+)(?:\..*)?/).matcher(groovy.version).with {
+        //        matches()
+        //        group(1)
+        //    }
+        //    group 'org.spockframework' version "2.3-groovy-$groovyMajor"
+        //    lib('core') {
+        //        exclude group: 'org.codehaus.groovy'
+        //        exclude group: 'org.apache.groovy'
+        //    }
+        //}
     }
 
     //noinspection GroovyAssignabilityCheck
