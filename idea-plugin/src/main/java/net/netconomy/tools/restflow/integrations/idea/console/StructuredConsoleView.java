@@ -40,12 +40,12 @@ import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.WindowManager;
-import com.intellij.ui.JBDefaultTreeCellRenderer;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.LayeredIcon;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.ui.render.LabelBasedRenderer;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.tree.TreeModelAdapter;
@@ -116,7 +116,7 @@ class StructuredConsoleView {
                 ApplicationManager.getApplication().invokeLater(() -> onLogNodeAdded(event));
             }
         });
-        logTree.setCellRenderer(new JBDefaultTreeCellRenderer() {
+        logTree.setCellRenderer(new LabelBasedRenderer.Tree() {
             @Override
             public Component getTreeCellRendererComponent(
                     JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
