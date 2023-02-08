@@ -69,7 +69,13 @@ class HttpBody {
     }
 
     byte[] getRawContent() {
-        return rawContent?.clone()
+        if (rawContent == null) {
+            return null
+        } else {
+            def c = new byte[rawContent.length]
+            System.arraycopy(rawContent, 0, c, 0, rawContent.length)
+            return c
+        }
     }
 
     Charset getCharset() {
