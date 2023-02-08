@@ -124,6 +124,14 @@ public class ConsoleProcessManager implements PersistentStateComponent<ConsoleSe
     }
 
     private void startConsole() throws ExecException {
+        var app = ApplicationManager.getApplication();
+        if (!app.isReadAccessAllowed()) {
+            app.<Void, ExecException>runReadAction(() -> {
+                startConsole();
+                return null;
+            });
+            return;
+        }
         if (!determineRestFlowAvailable()) {
             throw new ExecException("RESTflow is not in the classpath of module " + module.getName());
         }
