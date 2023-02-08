@@ -153,7 +153,7 @@ public class ContentView {
     }
 
     EditorEx getEditor() {
-        return (EditorEx)Objects.requireNonNull(editorTextField.getEditor(), "editorTextField.getEditor()");
+        return (EditorEx)Objects.requireNonNull(editorTextField.getEditor(true), "editorTextField.getEditor()");
     }
 
     void showBody(@Nullable StructuredLogTreeModel.Body body) {
