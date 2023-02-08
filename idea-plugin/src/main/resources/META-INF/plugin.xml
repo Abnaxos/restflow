@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <idea-plugin>
-  <idea-version since-build="191.6183.87"/>
+  <idea-version since-build="223"/>
   <id>net.netconomy.tools.restflow.integrations.idea</id>
   <name>RESTflow</name>
   <version>patched-by-gradle</version>

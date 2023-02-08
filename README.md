@@ -1,8 +1,13 @@
 Project status
 ==============
-- Provided as is
-- No active maintanance can be expected
-- No contributions are accepted
+
+For now, this is just a quick fork from
+[netconomy/restflow](https://github.com/netconomy/restflow)
+to fix some major breakages, mostly in the IDEA plugin.
+
+Thanks a lot to NETCONOMY for releasing the source code and thus allowing this
+tool to live on. :)
+
 
 RESTflow
 ========

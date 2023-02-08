@@ -1,6 +1,6 @@
 package net.netconomy.tools.restflow.frontend
 
-import groovy.ui.Console
+import groovy.console.ui.Console
 import net.netconomy.tools.restflow.dsl.RestFlow
 import net.netconomy.tools.restflow.impl.ProfileLoader
 import net.netconomy.tools.restflow.impl.RestFlowScripts

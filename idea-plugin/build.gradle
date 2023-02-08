@@ -4,13 +4,19 @@ ext.enableMavenPublishing = false
 
 intellij {
     pluginName = 'RESTflow'
-    version = '193.5233.102' //'2019.2.4'
+    version = '223.8617.56' //'2022.3.2'
     updateSinceUntilBuild = false
     type = 'IC'
 
-    sandboxDirectory = 'idea-sandbox'
+    sandboxDir = 'idea-sandbox'
 
     plugins = ['java', 'Groovy']
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 dependencies {
@@ -25,8 +31,8 @@ configurations {
     restflowJars
 }
 dependencies {
-    restflowJars project(path: ':core', configuration: 'runtime')
-    restflowJars project(path: ':frontend', configuration: 'runtime')
+    restflowJars project(path: ':core', configuration: 'default')
+    restflowJars project(path: ':frontend', configuration: 'default')
 }
 
 task collectRestflowJars(type: Sync) {

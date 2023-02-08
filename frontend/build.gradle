@@ -1,6 +1,6 @@
 dependencies {
-    compile project(':core')
-    compile group: dependencySets.groovy.group, name: 'groovy-console', version: dependencySets.groovy.version
+    api project(':core')
+    api group: dependencySets.groovy.group, name: 'groovy-console', version: dependencySets.groovy.version
 }
 
 task cleanAllLib(type: Delete) {
@@ -9,7 +9,7 @@ task cleanAllLib(type: Delete) {
 task allLib(type: Copy) {
     dependsOn cleanAllLib, jar, sourceJar
     destinationDir = file("$buildDir/lib-all")
-    from configurations.compile
+    from configurations.api
     from jar
     from sourceJar
     from project(':core').sourceJar

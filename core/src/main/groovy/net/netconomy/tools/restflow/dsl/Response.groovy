@@ -2,7 +2,8 @@ package net.netconomy.tools.restflow.dsl
 
 import groovy.json.JsonSlurper
 import groovy.transform.ToString
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.GPathResult
 import net.netconomy.tools.restflow.impl.CommLog
 import net.netconomy.tools.restflow.impl.HttpBody
 import org.apache.http.HttpResponse
