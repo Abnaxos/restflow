@@ -288,10 +288,10 @@ public class RfConsoleView implements ConsoleView {
     private JComponent buildStructuredComponent() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(structuredView.getComponent(), BorderLayout.CENTER);
-        panel.add(ActionManager.getInstance()
-                .createActionToolbar(getClass().getName() + ".structuredView",
-                        createTabActionGroup(structuredView.createActions()), false)
-                .getComponent(), BorderLayout.WEST);
+        var toolbar = ActionManager.getInstance().createActionToolbar(getClass().getName() + ".structuredView",
+                createTabActionGroup(structuredView.createActions()), false);
+        toolbar.setTargetComponent(rootPanel);
+        panel.add(toolbar.getComponent(), BorderLayout.WEST);
         tabs.setTabComponentInsets(JBUI.emptyInsets());
         return panel;
     }
@@ -299,9 +299,10 @@ public class RfConsoleView implements ConsoleView {
     private JComponent buildConsoleComponent() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(consoleView.getComponent(), BorderLayout.CENTER);
-        panel.add(ActionManager.getInstance()
-                .createActionToolbar(getClass().getName() + ".console",
-                        createTabActionGroup(consoleView.createConsoleActions()), false)
+        var actionToolbar = ActionManager.getInstance().createActionToolbar(getClass().getName() + ".console",
+                createTabActionGroup(consoleView.createConsoleActions()), false);
+        actionToolbar.setTargetComponent(consoleView.getComponent());
+        panel.add(actionToolbar
                 .getComponent(), BorderLayout.WEST);
         return panel;
     }

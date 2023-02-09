@@ -87,6 +87,7 @@ public class RfConsoleEditorHeaderProvider extends EditorNotifications.Provider<
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(
                 "RESTflow Console", group, true);
+        actionToolbar.setTargetComponent(fileEditor.getComponent());
         EditorHeaderComponent editorHeader = new EditorHeaderComponent();
         panel.add(actionToolbar.getComponent(), BorderLayout.WEST);
         JPanel profilePathPanel = new JPanel(new BorderLayout(5, 5));

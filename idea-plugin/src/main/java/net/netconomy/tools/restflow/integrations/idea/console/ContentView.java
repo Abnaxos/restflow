@@ -86,8 +86,10 @@ public class ContentView {
         container = new JPanel(new BorderLayout());
         editorTextField = new MyEditorTextField(project, console);
         container.add(editorTextField, BorderLayout.CENTER);
-        container.add(ActionManager.getInstance().createActionToolbar(
-                getClass().getName(), createToolbarActions(), false).getComponent(), BorderLayout.WEST);
+        var actionToolbar = ActionManager.getInstance().createActionToolbar(getClass().getName(),
+                createToolbarActions(), false);
+        actionToolbar.setTargetComponent(editorTextField);
+        container.add(actionToolbar.getComponent(), BorderLayout.WEST);
         if (console) {
             GlobalSearchScope searchScope = GlobalSearchScope.allScope(project);
             ArrayList<Filter> result = new ArrayList<>();
