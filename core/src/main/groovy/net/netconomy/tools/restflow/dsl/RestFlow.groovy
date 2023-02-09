@@ -237,7 +237,7 @@ class RestFlow {
      * @return The response.
      */
     Response GET(Map<String, ?> query, String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpGet()}, path, query, closure)
+        __executeRequest({new HttpGetWithBody()}, path, query, closure)
     }
 
     /**
@@ -251,7 +251,7 @@ class RestFlow {
      * @return The response.
      */
     Response GET(String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpGet()}, path, null, closure)
+        __executeRequest({new HttpGetWithBody()}, path, null, closure)
     }
 
     /**
