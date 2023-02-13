@@ -237,7 +237,7 @@ class RestFlow {
      * @return The response.
      */
     Response GET(Map<String, ?> query, String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpGetWithBody()}, path, query, closure)
+        __executeRequest({new HttpGetWithEntity()}, path, query, closure)
     }
 
     /**
@@ -251,7 +251,7 @@ class RestFlow {
      * @return The response.
      */
     Response GET(String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpGetWithBody()}, path, null, closure)
+        __executeRequest({new HttpGetWithEntity()}, path, null, closure)
     }
 
     /**
@@ -324,7 +324,7 @@ class RestFlow {
      * @return The response.
      */
     Response DELETE(Map<String, ?> query, String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpDelete()}, path, query, closure)
+        __executeRequest({new HttpDeleteWithEntity()}, path, query, closure)
     }
 
     /**
@@ -338,7 +338,7 @@ class RestFlow {
      * @return The response.
      */
     Response DELETE(String path, @RestDsl(RequestConfig) Closure closure = null) {
-        __executeRequest({new HttpDelete()}, path, null, closure)
+        __executeRequest({new HttpDeleteWithEntity()}, path, null, closure)
     }
 
     /**
