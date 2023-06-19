@@ -5,15 +5,19 @@ import org.apache.http.client.CookieStore
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.methods.*
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy
 import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
+import org.apache.http.ssl.TrustStrategy
 
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 import java.awt.*
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
 import java.util.List
 
 
@@ -76,9 +80,14 @@ class RestFlow {
                 Thread.currentThread().contextClassLoader ?: RestFlow.classLoader)
         this.log = log
         SSLContextBuilder sslCtxBuilder = new SSLContextBuilder()
-        sslCtxBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy())
+        sslCtxBuilder.loadTrustMaterial(null, new TrustStrategy() {
+            @Override
+            boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true
+            }
+        })
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                sslCtxBuilder.build())
+                sslCtxBuilder.build(), {n, session -> true})
         httpBackend = HttpClients.custom().
                 setSSLSocketFactory(sslSocketFactory).
                 setDefaultRequestConfig(org.apache.http.client.config.RequestConfig.custom().
