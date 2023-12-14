@@ -9,6 +9,7 @@ import net.netconomy.tools.restflow.impl.UtfCharsets
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.message.BasicNameValuePair
+import org.intellij.lang.annotations.Language
 
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -231,7 +232,7 @@ class RequestConfig {
      * @deprecated Use {@link #rawJson(String)} instead.
      */
     @Deprecated
-    void json(String json) {
+    void json(@Language("JSON") String json) {
         rawJson(json, true)
     }
 
@@ -241,7 +242,7 @@ class RequestConfig {
      *
      * @param json
      */
-    void rawJson(String json, boolean validate = true) {
+    void rawJson(@Language("JSON") String json, boolean validate = true) {
         acceptJson()
         if (validate) {
             new JsonSlurper().parseText(json)
@@ -286,7 +287,7 @@ class RequestConfig {
     /**
      * Set XML source code. Also sets the content type to "application/xml".
      */
-    void rawXml(String xml) {
+    void rawXml(@Language("XML") String xml) {
         content = xml
         contentType = HTTP.XmlType
     }

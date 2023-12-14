@@ -1,8 +1,9 @@
 dependencies {
     api libs.groovy
 
-    api group: 'commons-codec', name: 'commons-codec', version: '1.10'
-    api group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    api group: 'commons-codec', name: 'commons-codec', version: '1.16.0' //'1.13'
+    api group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
     api group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25'
     api group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
+    api group: 'org.jetbrains', name: 'annotations', version: '24.1.0'
 }
