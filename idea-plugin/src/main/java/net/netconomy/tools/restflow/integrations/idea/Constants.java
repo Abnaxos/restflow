@@ -24,9 +24,11 @@ public class Constants {
     public static final String ID_BASE = "net.netconomy.tools.restflow.integrations.idea";
 
     public static final String RESTFLOW_JARS_BASE = "net/netconomy/tools/restflow/shipped-jars/";
-    public static final String RESTFLOW_JARS_INDEX_NAME = "index";
+    public static final String RESTFLOW_JARS_INDEX_NAME = "index.txt";
     public static final String RESTFLOW_JARS_INDEX = RESTFLOW_JARS_BASE + RESTFLOW_JARS_INDEX_NAME;
     public static final String RESTFLOW_GLOBAL_LIBRARY = "RESTflow";
+
+    public static final String RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP = "ch.raffael.restflow.ShippedJarManager";
 
     private Constants() {
     }

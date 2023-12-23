@@ -1,8 +1,7 @@
 package net.netconomy.tools.restflow.integrations.idea.console;
 
-import javax.annotation.Nullable;
-
 import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import org.jetbrains.annotations.Nullable;
 
 
 public final class LogLine {

@@ -6,7 +6,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'org.jetbrains.intellij.plugins:gradle-intellij-plugin:1.12.0'
+        classpath 'org.jetbrains.intellij.plugins:gradle-intellij-plugin:1.13.3'
     }
 }
 
@@ -45,16 +45,16 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(8)
+            languageVersion = JavaLanguageVersion.of(11)
         }
     }
 
     ext.enableMavenPublishing = true
 
     libs {
-        groovy4 {group 'org.apache.groovy' version '4.0.8'}
+        groovy4 {group 'org.apache.groovy' version '4.0.16'}
         groovy3 {group 'org.codehaus.groovy' version '3.0.14'}
-        groovy(groovy3) {
+        groovy(groovy4) {
             lib 'groovy'
             lib 'groovy-datetime'
             lib 'groovy-nio'

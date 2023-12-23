@@ -9,8 +9,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +38,7 @@ import net.netconomy.tools.restflow.integrations.idea.console.ConsoleSettings;
 import net.netconomy.tools.restflow.integrations.idea.console.RfConsoleView;
 import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 @State(name = "RESTflow.ConsoleProcessManager")
@@ -149,8 +148,7 @@ public class ConsoleProcessManager implements PersistentStateComponent<ConsoleSe
             throw new ExecException(e.getMessage(), e);
         }
         try {
-            javaParams.getClassPath().addFirst(ApplicationManager.getApplication().getComponent(JarFactory.class)
-                    .consoleJar().toString());
+            javaParams.getClassPath().addFirst(ShippedJarManager.get(module).consoleJar().toString());
         } catch (IOException e) {
             throw new ExecException("Cannot create console.jar", e);
         }

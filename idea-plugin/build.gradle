@@ -4,7 +4,7 @@ ext.enableMavenPublishing = false
 
 intellij {
     pluginName = 'RESTflow'
-    version = '223.8617.56' //'2022.3.2'
+    version = '233.11799.300' // 2023.3.1
     updateSinceUntilBuild = false
     type = 'IC'
 
@@ -42,23 +42,27 @@ task collectRestflowJars(type: Sync) {
     def basePath = 'net/netconomy/tools/restflow/shipped-jars'
 
     def index = []
-    index.add System.currentTimeMillis().intdiv(1000) as String
+    index.add UUID.randomUUID()
 
-    into(basePath) {
+    into("$basePath/classes") {
         from configurations.restflowJars
+        eachFile {FileCopyDetails fcd ->
+            index.add "classes/$fcd.name"
+        }
+    }
+    into("$basePath/sources") {
         from project(':core').tasks.sourceJar
         from project(':frontend').tasks.sourceJar
-
         eachFile {FileCopyDetails fcd ->
-            index.add fcd.name
+            index.add "sources/$fcd.name"
         }
     }
     preserve {
-        include "$basePath/index"
+        include "$basePath/index.txt"
     }
 
     doLast {
-        file("$destinationDir/$basePath/index").setText(index.join('\n'))
+        file("$destinationDir/$basePath/index.txt").setText(index.join('\n') + '\n')
     }
 }
 

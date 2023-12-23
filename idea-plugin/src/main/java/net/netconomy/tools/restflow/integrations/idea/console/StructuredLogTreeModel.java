@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -29,6 +27,8 @@ import com.intellij.util.Base64;
 import com.intellij.util.ui.tree.TreeModelListenerList;
 import icons.JetgroovyIcons;
 import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 public class StructuredLogTreeModel implements TreeModel {
@@ -593,13 +593,13 @@ public class StructuredLogTreeModel implements TreeModel {
         final byte[] byteContent;
         @Nullable
         final String charContent;
-        Body(String mimeType, @Nonnull byte[] content) {
+        Body(String mimeType, @NotNull byte[] content) {
             this.mimeType = mimeType;
             this.binary = true;
             byteContent = content;
             charContent = null;
         }
-        Body(String mimeType, @Nonnull String content) {
+        Body(String mimeType, @NotNull String content) {
             this.mimeType = mimeType;
             this.binary = false;
             byteContent = null;
