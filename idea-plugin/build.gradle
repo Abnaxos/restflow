@@ -35,22 +35,33 @@ dependencies {
     restflowJars project(path: ':frontend', configuration: 'default')
 }
 
+def shippedJarsBuildDir = file("$buildDir/shipped-jars")
+def shippedJarsPrefix = 'net/netconomy/tools/restflow/jars'
+task consoleJar(type: Jar) {
+    def classesDir = sourceSets.main.java.classesDirectory.get().asFile
+    dependsOn tasks.compileJava
+    destinationDir = file("${sourceSets.main.output.resourcesDir}/$shippedJarsPrefix")
+    archiveFileName = "console.jar"
+    from(classesDir) {
+        include "net/netconomy/tools/restflow/integrations/idea/console/external/**.class"
+    }
+}
+tasks.processResources.dependsOn tasks.consoleJar
 task collectRestflowJars(type: Sync) {
     dependsOn project(':core').build, project(':core').sourceJar
 
-    destinationDir file("$buildDir/shipped-jars")
-    def basePath = 'net/netconomy/tools/restflow/shipped-jars'
+    destinationDir shippedJarsBuildDir
 
     def index = []
     index.add UUID.randomUUID()
 
-    into("$basePath/classes") {
+    into("$shippedJarsPrefix/lib/classes") {
         from configurations.restflowJars
         eachFile {FileCopyDetails fcd ->
             index.add "classes/$fcd.name"
         }
     }
-    into("$basePath/sources") {
+    into("$shippedJarsPrefix/lib/sources") {
         from project(':core').tasks.sourceJar
         from project(':frontend').tasks.sourceJar
         eachFile {FileCopyDetails fcd ->
@@ -58,11 +69,11 @@ task collectRestflowJars(type: Sync) {
         }
     }
     preserve {
-        include "$basePath/index.txt"
+        include "$shippedJarsPrefix/lib/index.txt"
     }
 
     doLast {
-        file("$destinationDir/$basePath/index.txt").setText(index.join('\n') + '\n')
+        file("$destinationDir/$shippedJarsPrefix/lib/index.txt").setText(index.join('\n') + '\n')
     }
 }
 

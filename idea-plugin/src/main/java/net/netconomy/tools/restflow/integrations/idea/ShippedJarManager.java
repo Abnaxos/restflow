@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,13 +15,9 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -42,7 +37,6 @@ import com.intellij.openapi.startup.ProjectActivity;
 import com.intellij.openapi.vfs.VfsUtil;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,26 +45,27 @@ import org.jetbrains.annotations.Nullable;
 public final class ShippedJarManager {
 
     private static final Logger LOG = Logger.getInstance(ShippedJarManager.class);
-    public static final String CONSOLE_JAR_NAME = "console.jar";
-
-    private final Path jarsBaseDir;
-    private final Path jarsIndexFile;
-    private final Path classesJarsDir;
-    private final Path sourcesJarsDir;
-    private Index shippedIndex = null;
-
     private static final ClassLoader RES = Objects.requireNonNull(ShippedJarManager.class.getClassLoader(),
-            "JarFactory.class.getClassLoader()");
+      "ShippedJarManager.class.getClassLoader()");
+
+    private final Path shippedJarsDir;
+    private final Path consoleJarFile;
+    private final Path libBaseDir;
+    private final Path libIndexFile;
+    private final Path libClassesJarsDir;
+    private final Path libSourcesJarsDir;
+    private Index shippedIndex = null;
+    private boolean didExtractConsoleJar = false;
 
     private final Object jarsLock = new Object();
-    private Path consoleJar = null;
 
     ShippedJarManager() {
-        jarsBaseDir = Paths.get(PathManager.getSystemPath()).resolve("restflow-jars").toAbsolutePath();
-        jarsIndexFile = jarsBaseDir.resolve(Constants.RESTFLOW_JARS_INDEX_NAME);
-        classesJarsDir = jarsBaseDir.resolve("classes");
-        sourcesJarsDir = jarsBaseDir.resolve("sources");
-        //ApplicationManagerEx.getApplicationEx().runWriteAction(this::initRestflowGlobalLibraries);
+        shippedJarsDir = Paths.get(PathManager.getSystemPath()).resolve("restflow-jars").toAbsolutePath();
+        consoleJarFile = shippedJarsDir.resolve(Constants.RESTFLOW_CONSOLE_JAR_NAME);
+        libBaseDir = shippedJarsDir.resolve("lib").toAbsolutePath();
+        libIndexFile = libBaseDir.resolve(Constants.RESTFLOW_LIB_INDEX_NAME);
+        libClassesJarsDir = libBaseDir.resolve("classes");
+        libSourcesJarsDir = libBaseDir.resolve("sources");
     }
 
     public static ShippedJarManager get(@SuppressWarnings("unused") Module module) {
@@ -83,54 +78,39 @@ public final class ShippedJarManager {
 
     public Path consoleJar() throws IOException {
         synchronized (jarsLock) {
-            if (consoleJar == null || !Files.isRegularFile(consoleJar)) {
-                Files.createDirectories(classesJarsDir);
-                Path jarPath = classesJarsDir.resolve(CONSOLE_JAR_NAME);
-                try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(jarPath.toFile()))) {
-                    for (String classFile : Interface.CLASS_FILES) {
-                        try (InputStream in = Objects.requireNonNull(
-                                RES.getResourceAsStream(classFile), "resource " + classFile))
-                        {
-                            ZipEntry entry = new ZipEntry(classFile);
-                            entry.setLastModifiedTime(FileTime.from(Instant.now()));
-                            jar.putNextEntry(entry);
-                            byte[] buf = new byte[8192];
-                            int c;
-                            while ((c = in.read(buf)) >= 0) {
-                                jar.write(buf, 0, c);
-                            }
-                        }
-                    }
-                }
-                this.consoleJar = jarPath;
+            if (!didExtractConsoleJar || !Files.isRegularFile(consoleJarFile)) {
+                extractConsoleJar();
             }
-            return consoleJar;
+            return consoleJarFile;
         }
     }
 
     private void initShippedJars() {
         try {
-            if (shippedIndex == null) {
-                try (var stream = new BufferedInputStream(
-                  Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(Constants.RESTFLOW_JARS_INDEX),
-                    "Resource " + Constants.RESTFLOW_JARS_INDEX)))
-                {
-                    shippedIndex = loadIndexFile(stream);
+            synchronized (jarsLock) {
+                if (shippedIndex == null) {
+                    try (var stream = new BufferedInputStream(
+                      Objects.requireNonNull(RES.getResourceAsStream(Constants.RESTFLOW_LIB_INDEX),
+                        "Resource " + Constants.RESTFLOW_LIB_INDEX)))
+                    {
+                        shippedIndex = loadIndexFile(stream);
+                    }
                 }
-            }
-            boolean didUpdate = false;
-            if (!checkExtractedJars(shippedIndex)) {
-                didUpdate = true;
-                extractShippedJars(shippedIndex);
-            }
-            if (initRestflowGlobalLibrary()) {
-                didUpdate = true;
-            }
-            if (didUpdate) {
-                //noinspection DialogTitleCapitalization
-                Notifications.Bus.notify(new Notification(Constants.RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP,
-                  "RESTflow Global Library",
-                  "The RESTflow global library has been updated", NotificationType.INFORMATION));
+                extractConsoleJar();
+                boolean didUpdate = false;
+                if (!checkExtractedLibJars(shippedIndex)) {
+                    didUpdate = true;
+                    extractShippedLibJars(shippedIndex);
+                }
+                if (initRestflowGlobalLibrary()) {
+                    didUpdate = true;
+                }
+                if (didUpdate) {
+                    //noinspection DialogTitleCapitalization
+                    Notifications.Bus.notify(new Notification(Constants.RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP,
+                      "RESTflow Global Library",
+                      "The RESTflow global library has been updated", NotificationType.INFORMATION));
+                }
             }
         } catch (Exception e) {
             setupError(e);
@@ -149,10 +129,10 @@ public final class ShippedJarManager {
                         var libRo = libraryRegistrar.getLibraryTable().createLibrary(Constants.RESTFLOW_GLOBAL_LIBRARY);
                         var lib = libRo.getModifiableModel();
                         //noinspection DataFlowIssue
-                        lib.addJarDirectory(VfsUtil.findFile(Files.createDirectories(classesJarsDir), true),
+                        lib.addJarDirectory(VfsUtil.findFile(Files.createDirectories(libClassesJarsDir), true),
                           false, OrderRootType.CLASSES);
                         //noinspection DataFlowIssue
-                        lib.addJarDirectory(VfsUtil.findFile(Files.createDirectories(sourcesJarsDir), true),
+                        lib.addJarDirectory(VfsUtil.findFile(Files.createDirectories(libSourcesJarsDir), true),
                           false, OrderRootType.SOURCES);
                         lib.commit();
                     });
@@ -167,26 +147,41 @@ public final class ShippedJarManager {
         }
     }
 
-    private void extractShippedJars(Index index) throws IOException {
+    private void extractConsoleJar() throws IOException {
         synchronized (jarsLock) {
-            Files.walkFileTree(jarsBaseDir, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
+            try(var inStream = RES.getResourceAsStream(Constants.RESTFLOW_CONSOLE_JAR)) {
+                if (inStream == null) {
+                    throw new FileNotFoundException("resource " + Constants.RESTFLOW_CONSOLE_JAR);
                 }
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    if (!dir.equals(jarsBaseDir)) {
-                        Files.delete(dir);
+                Files.createDirectories(consoleJarFile.getParent());
+                Files.copy(inStream, consoleJarFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            didExtractConsoleJar = true;
+        }
+    }
+
+    private void extractShippedLibJars(Index index) throws IOException {
+        synchronized (jarsLock) {
+            if (Files.isDirectory(libBaseDir)) {
+                Files.walkFileTree(libBaseDir, new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        if (!dir.equals(libBaseDir)) {
+                            Files.delete(dir);
+                        }
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            }
             for (var file : index.paths()) {
-                var target = jarsBaseDir.resolve(file);
-                var resource = Constants.RESTFLOW_JARS_BASE + toSlashedPath(file);
-                try (var inStream = getClass().getClassLoader().getResourceAsStream(resource)) {
+                var target = libBaseDir.resolve(file);
+                var resource = Constants.RESTFLOW_LIB_BASE + toSlashedPath(file);
+                try (var inStream = RES.getResourceAsStream(resource)) {
                     if (inStream == null) {
                         throw new FileNotFoundException("resource " + resource);
                     }
@@ -194,7 +189,7 @@ public final class ShippedJarManager {
                     Files.copy(inStream, target, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
-            try (var out = Files.newBufferedWriter(jarsIndexFile, StandardCharsets.UTF_8)) {
+            try (var out = Files.newBufferedWriter(libIndexFile, StandardCharsets.UTF_8)) {
                 out.write(index.version);
                 out.write("\n");
                 for (var p: index.paths) {
@@ -242,12 +237,12 @@ public final class ShippedJarManager {
         }
     }
 
-    private boolean checkExtractedJars(Index expectedIndex) throws IOException {
+    private boolean checkExtractedLibJars(Index expectedIndex) throws IOException {
         synchronized (jarsLock) {
-            if (!Files.isDirectory(jarsBaseDir)) {
+            if (!Files.isDirectory(libBaseDir)) {
                 return false;
             }
-            Path indexPath = jarsBaseDir.resolve(Constants.RESTFLOW_JARS_INDEX_NAME);
+            Path indexPath = libBaseDir.resolve(Constants.RESTFLOW_LIB_INDEX_NAME);
             if (!Files.isRegularFile(indexPath)) {
                 return false;
             }
@@ -260,11 +255,11 @@ public final class ShippedJarManager {
             }
             //FileTime indexLastModified = Files.getLastModifiedTime(indexPath);
             boolean[] upToDate = {true};
-            Files.walkFileTree(jarsBaseDir, new SimpleFileVisitor<>() {
+            Files.walkFileTree(libBaseDir, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    var relFile = jarsBaseDir.relativize(file);
-                    if (index.paths().contains(relFile) || file.equals(jarsIndexFile)) {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    var relFile = libBaseDir.relativize(file);
+                    if (index.paths().contains(relFile) || file.equals(libIndexFile)) {
                         // || Files.getLastModifiedTime(file).compareTo(indexLastModified) > 0
                         return FileVisitResult.CONTINUE;
                     } else {
