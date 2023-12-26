@@ -39,7 +39,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.LayeredIcon;
 import com.intellij.ui.components.JBScrollPane;
@@ -332,7 +331,10 @@ class StructuredConsoleView {
         }
         lineBuffer.add(line);
         if (statusBarMessage != null) {
-            WindowManager.getInstance().getStatusBar(root, project).setInfo(statusBarMessage);
+            // TODO (2023-12-26) find a good way to communicate these
+            // just nothing is better than NPE and IDE error, though; also, it doesn't work anyway
+            //StatusBar.Info.set(statusBarMessage, project);
+            //WindowManager.getInstance().getStatusBar(root, project).setInfo(statusBarMessage);
         }
     }
 
