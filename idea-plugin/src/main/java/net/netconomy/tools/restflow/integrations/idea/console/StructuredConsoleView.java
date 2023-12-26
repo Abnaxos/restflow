@@ -48,6 +48,7 @@ import com.intellij.ui.components.labels.LinkLabel;
 import com.intellij.ui.render.LabelBasedRenderer;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeModelAdapter;
 import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
 import net.netconomy.tools.restflow.integrations.idea.util.StreamNavigation;
@@ -77,6 +78,7 @@ class StructuredConsoleView {
     private final JBSplitter mainSplitter;
     private final Tree logTree;
     private final JBScrollPane eventScroller;
+    private final JLabel statusLabel;
     private final JPanel detailsPanel;
     private final JLabel noDetails;
     private final JPanel requestDetails;
@@ -106,6 +108,7 @@ class StructuredConsoleView {
         root = new JPanel(new BorderLayout());
         mainSplitter = new JBSplitter(StructuredConsoleView.class.getName(), .25f);
         root.add(mainSplitter, BorderLayout.CENTER);
+        var eventPanel = new JPanel(new BorderLayout(0, 0));
         logTree = new Tree(logModel = new StructuredLogTreeModel());
         logTree.setRootVisible(false);
         logTree.setShowsRootHandles(true);
@@ -130,20 +133,25 @@ class StructuredConsoleView {
         logTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         eventScroller = new JBScrollPane(logTree);
         eventScroller.setBorder(BorderFactory.createEmptyBorder());
-        mainSplitter.setFirstComponent(eventScroller);
+        eventPanel.add(eventScroller, BorderLayout.CENTER);
+        eventPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIUtil.getBoundsColor()));
+        statusLabel = new JLabel();
+        statusLabel.setMinimumSize(new Dimension(0, 0));
+        statusLabel.setForeground(UIUtil.getLabelInfoForeground());
+        eventPanel.add(statusLabel, BorderLayout.SOUTH);
+        mainSplitter.setFirstComponent(eventPanel);
         detailsPanel = new JPanel(new BorderLayout(0, 0));
         noDetails = new JLabel("No Selection", SwingConstants.CENTER);
         noDetails.setVerticalAlignment(SwingConstants.CENTER);
         requestDetails = new JPanel(new BorderLayout(0, 0));
-        logTree.addTreeSelectionListener(
-                e -> {
-                    autoScrollIgnoreSelection = null;
-                    if (e.getPath() == null || !e.isAddedPath()) {
-                        setDetails(noDetails);
-                    } else {
-                        updateSelection((StructuredLogTreeModel.Node<?, ?>)e.getPath().getLastPathComponent());
-                    }
-                });
+        logTree.addTreeSelectionListener(e -> {
+            autoScrollIgnoreSelection = null;
+            if (e.getPath() == null || !e.isAddedPath()) {
+                setDetails(noDetails);
+            } else {
+                updateSelection((StructuredLogTreeModel.Node<?, ?>)e.getPath().getLastPathComponent());
+            }
+        });
         mainSplitter.setSecondComponent(detailsPanel);
         requestSummaryPanel = new JPanel(new BorderLayout(0, 0));
         requestSummaryPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
@@ -318,10 +326,13 @@ class StructuredConsoleView {
     }
 
     private void addLogLine(String text) {
+        record StatusMsg(String text, @Nullable Icon icon) {
+            StatusMsg(String text) {this(text, null);}
+        }
         LogLine line = LogLine.of(text);
-        String statusBarMessage = null;
+        StatusMsg statusMsg = null;
         if (line.channel() == LogLine.Channel.CONSOLE) {
-            if (line.text().startsWith(Interface.RUN_OUT_RUN)) {
+            if (line.text().startsWith(Interface.RUN_OUT_RUN) || line.text().startsWith(Interface.RUN_OUT_DEBUG)) {
                 String s = line.text().substring(Interface.RUN_OUT_RUN.length()).trim();
                 s = s.replace(File.separatorChar, '/');
                 int pos = s.lastIndexOf('/');
@@ -329,21 +340,24 @@ class StructuredConsoleView {
                     s = s.substring(pos + 1);
                 }
                 currentScript = s;
-                statusBarMessage = "Running RESTflow script " + currentScript;
+                statusMsg = new StatusMsg("Running " + currentScript);
             }
-            if (line.text().startsWith(Interface.RUN_OUT_RUN)) {
-                statusBarMessage = "RESTflow script " + currentScript + " finished successfully";
+            if (line.text().startsWith(Interface.RUN_OUT_SUCCESS)) {
+                statusMsg = new StatusMsg(currentScript + " finished successfully");
             } else if (line.text().startsWith(Interface.RUN_OUT_ERROR)) {
-                statusBarMessage = "RESTflow script " + currentScript + " finished with error: "
-                        + line.text().substring(Interface.RUN_OUT_ERROR.length()).trim();
+                statusMsg = new StatusMsg(currentScript + " finished with error: "
+                        + line.text().substring(Interface.RUN_OUT_ERROR.length()).trim());
             }
         }
         lineBuffer.add(line);
-        if (statusBarMessage != null) {
+        if (statusMsg != null) {
             // TODO (2023-12-26) find a good way to communicate these
             // just nothing is better than NPE and IDE error, though; also, it doesn't work anyway
-            //StatusBar.Info.set(statusBarMessage, project);
-            //WindowManager.getInstance().getStatusBar(root, project).setInfo(statusBarMessage);
+            statusLabel.setText(statusMsg.text());
+            statusLabel.setToolTipText(statusMsg.text());
+            statusLabel.setIcon(statusMsg.icon());
+            //StatusBar.Info.set(statusMsg, project);
+            //WindowManager.getInstance().getStatusBar(root, project).setInfo(statusMsg);
         }
     }
 

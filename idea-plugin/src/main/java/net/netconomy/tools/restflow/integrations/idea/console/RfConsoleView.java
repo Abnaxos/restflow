@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import com.intellij.execution.ExecutionManager;
 import com.intellij.execution.Executor;
 import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.filters.Filter;
