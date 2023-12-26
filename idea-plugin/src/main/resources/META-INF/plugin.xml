@@ -34,7 +34,7 @@
       <className>net.netconomy.tools.restflow.integrations.idea.console.RunScriptIntentionAction</className>
       <category>RESTflow intentions</category>
     </intentionAction>
-    <notificationGroup displayType="STICKY_BALLOON" id="ch.raffael.restflow.ShippedJarManager"/>
+    <notificationGroup displayType="STICKY_BALLOON" id="ch.raffael.restflow"/>
   </extensions>
   <extensions defaultExtensionNs="org.intellij.groovy">
     <scriptTypeDetector implementation="net.netconomy.tools.restflow.integrations.idea.lang.RfScriptTypeDetector"/>

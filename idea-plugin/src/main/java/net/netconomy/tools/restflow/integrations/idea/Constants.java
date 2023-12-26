@@ -31,7 +31,7 @@ public class Constants {
     public static final String RESTFLOW_LIB_INDEX = RESTFLOW_LIB_BASE + RESTFLOW_LIB_INDEX_NAME;
     public static final String RESTFLOW_GLOBAL_LIBRARY = "RESTflow";
 
-    public static final String RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP = "ch.raffael.restflow.ShippedJarManager";
+    public static final String RESTFLOW_NOTIFICATION_GROUP = "ch.raffael.restflow";
 
     private Constants() {
     }

@@ -10,9 +10,8 @@ public class StreamNavigation {
     }
 
     public static Predicate<Object> before(Object ref) {
-        return new Predicate<Object>() {
+        return new Predicate<>() {
             private boolean found = false;
-
             @Override
             public boolean test(Object elem) {
                 if (found) {
@@ -26,9 +25,8 @@ public class StreamNavigation {
     }
 
     public static Predicate<Object> after(Object ref) {
-        return new Predicate<Object>() {
+        return new Predicate<>() {
             private boolean found = false;
-
             @Override
             public boolean test(Object node) {
                 if (found) {

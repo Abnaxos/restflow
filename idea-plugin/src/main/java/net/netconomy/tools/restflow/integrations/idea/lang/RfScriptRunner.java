@@ -1,9 +1,7 @@
 package net.netconomy.tools.restflow.integrations.idea.lang;
 
 import java.util.Objects;
-import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.openapi.module.Module;

@@ -19,9 +19,8 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationDisplayType;
-import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -30,45 +29,38 @@ import com.intellij.openapi.application.ex.ApplicationInfoEx;
 import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.TextTransferable;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static org.jsoup.nodes.Document.OutputSettings.Syntax.html;
-
-
-/**
- * @since 2018-09-29
- */
-public class DiagnosticsDialog extends DialogWrapper {
-
-    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(
-            Constants.ERRORS_NOTIFICATION_GROUP, NotificationDisplayType.BALLOON, false);
+public final class MyNotifications extends DialogWrapper {
 
     private final String message;
     private final String report;
 
-    public DiagnosticsDialog(@Nullable Project project, String message, @Nullable Throwable exception) {
+    private MyNotifications(@Nullable Project project, String message, @Nullable Throwable exception) {
         super(project, false, IdeModalityType.MODELESS);
-        //noinspection DialogTitleCapitalization
-        setTitle("nc-idea Diagnostics");
+        setTitle("RESTflow Diagnostics");
         this.message = message;
         this.report = createReport(exception);
         init();
     }
 
-    public static void notifyError(Project project, String message, Throwable exception) {
-        NOTIFICATION_GROUP.createNotification(message, MessageType.ERROR)
-                .addAction(new AnAction("Show Details...") {
-                    @Override
-                    public void actionPerformed(@NotNull AnActionEvent e) {
-                        DiagnosticsDialog.show(project, message, exception);
-                    }
-                })
-                .notify(project);
+    public static void notifyInfo(@Nullable Project project, String message) {
+        Notifications.Bus.notify(new Notification(Constants.RESTFLOW_NOTIFICATION_GROUP,
+          "RESTflow", message, NotificationType.INFORMATION));
+    }
+
+    public static void notifyError(@Nullable Project project, String message, Throwable exception) {
+        Notifications.Bus.notify(new Notification(Constants.RESTFLOW_NOTIFICATION_GROUP,
+          "RESTflow", message, NotificationType.ERROR)
+          .addAction(new AnAction("Show Details...") {
+              @Override
+              public void actionPerformed(@NotNull AnActionEvent e) {
+                  MyNotifications.showDetailDialog(project, message, exception);
+              }
+          }));
     }
 
     private String createReport(@Nullable Throwable exception) {
@@ -130,17 +122,20 @@ public class DiagnosticsDialog extends DialogWrapper {
                     {
                         putValue(Action.MNEMONIC_KEY, (int)'c');
                     }
-
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         CopyPasteManager.getInstance().setContents(
-                                new TextTransferable("<pre>" + StringEscapeUtils.escapeHtml3(report) + "</pre>", report));
+                                new TextTransferable("<pre>" + escapeHtml(report) + "</pre>", report));
                     }
+
                 }
         };
     }
 
-    @Nullable
+    private String escapeHtml(String str) {
+        return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     @Override
     protected JComponent createCenterPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
@@ -170,9 +165,9 @@ public class DiagnosticsDialog extends DialogWrapper {
         return print;
     }
 
-    public static void show(@Nullable Project project, String message, @Nullable Throwable exception) {
+    public static void showDetailDialog(@Nullable Project project, String message, @Nullable Throwable exception) {
         ApplicationManager.getApplication().invokeLater(() -> {
-            DiagnosticsDialog dialog = new DiagnosticsDialog(project, message, exception);
+            MyNotifications dialog = new MyNotifications(project, message, exception);
             dialog.pack();
             dialog.show();
         });

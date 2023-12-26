@@ -53,7 +53,7 @@ task collectRestflowJars(type: Sync) {
     destinationDir shippedJarsBuildDir
 
     def index = []
-    index.add UUID.randomUUID()
+    index.add "$project.version-${UUID.randomUUID()}"
 
     into("$shippedJarsPrefix/lib/classes") {
         from configurations.restflowJars

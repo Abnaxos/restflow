@@ -22,7 +22,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilCore;
 import net.netconomy.tools.restflow.integrations.idea.ConsoleProcessManager;
 import net.netconomy.tools.restflow.integrations.idea.Constants;
-import net.netconomy.tools.restflow.integrations.idea.DiagnosticsDialog;
+import net.netconomy.tools.restflow.integrations.idea.MyNotifications;
 import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +97,7 @@ public class RunRestFlowAction extends AnAction {
         try {
             runRestFlow(module, virtualFile.getUrl(), VfsUtilCore.loadText(virtualFile));
         } catch (IOException e) {
-            DiagnosticsDialog.notifyError(module.getProject(), "I/O loading script from " + virtualFile.getUrl(), e);
+            MyNotifications.notifyError(module.getProject(), "I/O loading script from " + virtualFile.getUrl(), e);
         }
     }
 
@@ -107,7 +107,7 @@ public class RunRestFlowAction extends AnAction {
                     try {
                         Interface.sendScript(uri, script, p.getProcessInput());
                     } catch (IOException ex) {
-                        DiagnosticsDialog.notifyError(module.getProject(), "I/O error sending script to console", ex);
+                        MyNotifications.notifyError(module.getProject(), "I/O error sending script to console", ex);
                     }
                 }));
     }

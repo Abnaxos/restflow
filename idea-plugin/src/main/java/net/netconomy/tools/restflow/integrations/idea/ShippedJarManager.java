@@ -19,9 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.application.ReadAction;
@@ -106,10 +103,7 @@ public final class ShippedJarManager {
                     didUpdate = true;
                 }
                 if (didUpdate) {
-                    //noinspection DialogTitleCapitalization
-                    Notifications.Bus.notify(new Notification(Constants.RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP,
-                      "RESTflow Global Library",
-                      "The RESTflow global library has been updated", NotificationType.INFORMATION));
+                    MyNotifications.notifyInfo(null, "RESTflow global libraray has been updated");
                 }
             }
         } catch (Exception e) {
@@ -274,10 +268,7 @@ public final class ShippedJarManager {
 
     private void setupError(Throwable exception) {
         LOG.error("Error setting up RESTflow global library", exception);
-        //noinspection DialogTitleCapitalization
-        Notifications.Bus.notify(new Notification(Constants.RESTFLOW_JAR_MANAGER_NOTIFICATION_GROUP,
-          "RESTflow Global Library",
-          "An error occurred updating RESTflow global library (see IDE Errors for details).", NotificationType.ERROR));
+        MyNotifications.notifyError(null, "An error occurred updating RESTflow global library", exception);
     }
 
     private record Index(String version, Set<Path> paths) {}

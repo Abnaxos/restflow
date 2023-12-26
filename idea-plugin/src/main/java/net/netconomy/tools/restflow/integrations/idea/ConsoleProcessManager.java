@@ -30,7 +30,7 @@ import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.util.io.BaseOutputReader;
@@ -116,7 +116,7 @@ public class ConsoleProcessManager implements PersistentStateComponent<ConsoleSe
             try {
                 consumer.accept(Optional.of(startIfNotRunning()));
             } catch (ExecException e) {
-                DiagnosticsDialog.notifyError(project, "Error starting RESTflow console: " + e.getMessage(), e);
+                MyNotifications.notifyError(project, "Error starting RESTflow console: " + e.getMessage(), e);
                 consumer.accept(Optional.empty());
             }
         }
@@ -219,7 +219,7 @@ public class ConsoleProcessManager implements PersistentStateComponent<ConsoleSe
     private List<File> localRootsOf(VirtualFile[] contentRoots) {
         return Stream.of(contentRoots)
                 .filter(VirtualFile::isInLocalFileSystem)
-                .map(VfsUtil::virtualToIoFile)
+                .map(VfsUtilCore::virtualToIoFile)
                 .collect(Collectors.toList());
     }
 
