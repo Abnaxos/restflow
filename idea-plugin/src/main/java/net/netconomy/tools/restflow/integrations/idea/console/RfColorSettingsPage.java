@@ -41,11 +41,13 @@ public class RfColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public String getDemoText() {
-        return "<consoleMsg>RESTflow Console Read</consoleMsg>\n"
-                + "<httpOut>GET /foo/bar</httpOut>\n"
-                + "<httpInOk>200 OK</httpInOk>\n"
-                + "<httpInErr>404 NOT_FOUND</httpInErr>\n"
-                + "<httpInWarn>301 MOVED_PERMANENTLY</httpInWarn>\n";
+        return """
+          <consoleMsg>RESTflow Console Read</consoleMsg>
+          <httpOut>GET /foo/bar</httpOut>
+          <httpInOk>200 OK</httpInOk>
+          <httpInErr>404 NOT_FOUND</httpInErr>
+          <httpInWarn>301 MOVED_PERMANENTLY</httpInWarn>
+          """;
     }
 
     @Nullable

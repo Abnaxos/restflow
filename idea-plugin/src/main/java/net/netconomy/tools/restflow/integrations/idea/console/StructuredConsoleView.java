@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Separator;
@@ -66,9 +67,9 @@ class StructuredConsoleView {
 
     private static final Icon PREV_ICON = AllIcons.Actions.PreviousOccurence;
     private static final Icon NEXT_ICON = AllIcons.Actions.NextOccurence;
-    private static final Icon PREV_ERR_ICON = new LayeredIcon(PREV_ICON, AllIcons.General.WarningDecorator);
-    private static final Icon NEXT_ERR_ICON = new LayeredIcon(NEXT_ICON, AllIcons.General.WarningDecorator);
-    private static final Icon LAST_ERR_ICON = new LayeredIcon(
+    private static final Icon PREV_ERR_ICON = LayeredIcon.create(PREV_ICON, AllIcons.General.WarningDecorator);
+    private static final Icon NEXT_ERR_ICON = LayeredIcon.create(NEXT_ICON, AllIcons.General.WarningDecorator);
+    private static final Icon LAST_ERR_ICON = LayeredIcon.create(
             AllIcons.RunConfigurations.Scroll_down, AllIcons.General.WarningDecorator);
 
     private final Project project;
@@ -87,7 +88,7 @@ class StructuredConsoleView {
     private final ContentView responseView;
     private final ContentView logView;
 
-    private StructuredLogTreeModel logModel;
+    private final StructuredLogTreeModel logModel;
 
     private final List<LogLine> lineBuffer = new ArrayList<>();
     @SuppressWarnings("StringBufferField")
@@ -120,7 +121,7 @@ class StructuredConsoleView {
             public Component getTreeCellRendererComponent(
                     JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-                StructuredLogTreeModel.Node node = (StructuredLogTreeModel.Node)value;
+                var node = (StructuredLogTreeModel.Node<?, ?>)value;
                 setText(node.text());
                 setIcon(node.icon());
                 return this;
@@ -140,7 +141,7 @@ class StructuredConsoleView {
                     if (e.getPath() == null || !e.isAddedPath()) {
                         setDetails(noDetails);
                     } else {
-                        updateSelection((StructuredLogTreeModel.Node)e.getPath().getLastPathComponent());
+                        updateSelection((StructuredLogTreeModel.Node<?, ?>)e.getPath().getLastPathComponent());
                     }
                 });
         mainSplitter.setSecondComponent(detailsPanel);
@@ -149,9 +150,9 @@ class StructuredConsoleView {
         requestSummaryPanel.setVisible(false);
         requestSummaryHeadLabel = new JLabel("GET ");
         requestSummaryPanel.add(requestSummaryHeadLabel, BorderLayout.WEST);
-        requestLinkLabel = LinkLabel.create("http://www.example.com/", null);
+        //noinspection DialogTitleCapitalization
+        requestLinkLabel = new LinkLabel<>("https://example.com/", null, (l, __) -> BrowserUtil.browse(l.getText()));
         requestLinkLabel.setMinimumSize(new Dimension(0, 0));
-        requestLinkLabel.setListener((l, __) -> BrowserUtil.browse(l.getText()), null);
         requestSummaryPanel.add(requestLinkLabel, BorderLayout.CENTER);
         requestDetails.add(requestSummaryPanel, BorderLayout.NORTH);
         detailsTabs = new JBTabbedPane();
@@ -224,6 +225,10 @@ class StructuredConsoleView {
                         });
             }
             @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.EDT;
+            }
+            @Override
             public void update(@NotNull AnActionEvent e) {
                 super.update(e);
                 e.getPresentation().setEnabled(node().isPresent());
@@ -273,6 +278,10 @@ class StructuredConsoleView {
                     @Override
                     public void setSelected(@NotNull AnActionEvent e, boolean state) {
                         setAutoScroll(state);
+                    }
+                    @Override
+                    public @NotNull ActionUpdateThread getActionUpdateThread() {
+                        return ActionUpdateThread.EDT;
                     }
                 },
                 new AnAction("Clear", null, AllIcons.Actions.GC) {
@@ -344,10 +353,10 @@ class StructuredConsoleView {
             lines = ImmutableList.copyOf(lineBuffer);
             lineBuffer.clear();
         }
-        lines.forEach(l -> logModel.appendLogLine(l));
+        lines.forEach(logModel::appendLogLine);
     }
 
-    private void updateSelection(StructuredLogTreeModel.Node node) {
+    private void updateSelection(StructuredLogTreeModel.Node<?, ?> node) {
         setDetails(requestDetails);
         ApplicationManager.getApplication().runWriteAction(() ->
                 WriteCommandAction.writeCommandAction(project).run(() -> {
@@ -365,20 +374,20 @@ class StructuredConsoleView {
                     requestSummaryHeadLabel.setText("");
                     boolean summaryVisible = false;
                     if (node instanceof StructuredLogTreeModel.RequestNode) {
-                        StructuredLogTreeModel.RequestNode rn = (StructuredLogTreeModel.RequestNode)node;
+                        var rn = (StructuredLogTreeModel.RequestNode)node;
                         StringBuilder summary = new StringBuilder();
                         if (rn.httpCode() != null) {
                             summary.append(rn.httpCode());
                             summaryVisible = true;
                         }
                         if (rn.method() != null) {
-                            if (summary.length() > 0) {
+                            if (!summary.isEmpty()) {
                                 summary.append(": ");
                             }
                             summary.append(rn.method());
                             summaryVisible = true;
                         }
-                        if (summary.length() > 0) {
+                        if (!summary.isEmpty()) {
                             summary.append(' ');
                         }
                         requestSummaryHeadLabel.setText(summary.toString());

@@ -20,9 +20,11 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -114,11 +116,14 @@ public class RfConsoleView implements ConsoleView {
                 proc.stop(proc::uiStartIfNotRunning);
             });
         }
-
         @Override
         public void update(@NotNull AnActionEvent e) {
             e.getPresentation().setEnabled(
                     !module.isDisposed() && !processHandler.isProcessTerminated());
+        }
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
         }
     };
 
@@ -258,11 +263,9 @@ public class RfConsoleView implements ConsoleView {
     public void bringToFront() {
         ApplicationManager.getApplication().assertIsDispatchThread();
         if (isShown) {
-            ExecutionManager.getInstance(project).getContentManager()
-                    .toFrontRunContent(DEFAULT_EXECUTOR, descriptor);
+            RunContentManager.getInstance(project).toFrontRunContent(DEFAULT_EXECUTOR, descriptor);
         } else {
-            ExecutionManager.getInstance(project).getContentManager()
-                    .showRunContent(DEFAULT_EXECUTOR, descriptor, descriptor);
+            RunContentManager.getInstance(project).showRunContent(DEFAULT_EXECUTOR, descriptor, descriptor);
             isShown = true;
         }
     }
@@ -342,7 +345,7 @@ public class RfConsoleView implements ConsoleView {
 
         @Override
         public void print(@NotNull String text, @NotNull ConsoleViewContentType contentType) {
-            if (contentType.equals(ConsoleViewContentType.NORMAL_OUTPUT) && text.length() > 0) {
+            if (contentType.equals(ConsoleViewContentType.NORMAL_OUTPUT) && !text.isEmpty()) {
                 synchronized (printLock) {
                     structuredView.append(text);
                     int mark = 0;

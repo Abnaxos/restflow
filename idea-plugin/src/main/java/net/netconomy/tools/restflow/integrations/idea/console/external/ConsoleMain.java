@@ -32,8 +32,8 @@ public class ConsoleMain {
     private final PrintStream stdout;
     private final PrintStream stderr;
 
-    private boolean echoScript;
-    private RestFlow restFlow;
+    private final boolean echoScript;
+    private final RestFlow restFlow;
 
     private ConsoleMain(List<String> args, InputStream stdin, PrintStream stdout, PrintStream stderr) {
         this.stdin = stdin;
@@ -62,9 +62,9 @@ public class ConsoleMain {
         PrintStream stderr = System.err;
         System.setIn(new ByteArrayInputStream(new byte[0]));
         System.setOut(new PrintStream(new LinePrefixOutputStream(
-                stdout, Interface.PREFIX_OUT_STDOUT), true, Interface.CHARSET.name()));
+                stdout, Interface.PREFIX_OUT_STDOUT), true, Interface.CHARSET));
         System.setErr(new PrintStream(new LinePrefixOutputStream(
-                stdout, Interface.PREFIX_OUT_STDERR), true, Interface.CHARSET.name()));
+                stdout, Interface.PREFIX_OUT_STDERR), true, Interface.CHARSET));
         new ConsoleMain(Arrays.asList(args), stdin, stdout, stderr).run();
     }
 
@@ -110,6 +110,7 @@ public class ConsoleMain {
             if (e instanceof VirtualMachineError || e instanceof LinkageError) {
                 throw e;
             }
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             exception = e;
         }

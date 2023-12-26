@@ -3,11 +3,7 @@ package net.netconomy.tools.restflow.integrations.idea.console.external;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -40,10 +36,7 @@ public class Interface {
         int pos = n.lastIndexOf('.');
         PACKAGE_NAME = n.substring(0, pos);
     }
-    public static final String PACKAGE_BINARY_NAME = PACKAGE_NAME.replace('.', '/');
-    public static final List<String> CLASS_FILES = Collections.unmodifiableList(
-            Stream.of("ConsoleMain", "LinePrefixOutputStream", "IdeaCommLog", "Interface")
-                    .map(n -> PACKAGE_BINARY_NAME + "/" + n + ".class").collect(Collectors.toList()));
+
     public static final String CONSOLE_MAIN_CLASS = PACKAGE_NAME + ".ConsoleMain";
 
     private static final Pattern LINE_RE = Pattern.compile("\\n|\\r\\n?");

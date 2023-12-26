@@ -10,7 +10,6 @@ import java.util.Optional;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import com.google.common.collect.ImmutableMap;
 import com.intellij.codeInsight.actions.FileInEditorProcessor;
 import com.intellij.codeInsight.actions.ReformatCodeRunOptions;
 import com.intellij.codeInsight.actions.TextRangeType;
@@ -24,6 +23,7 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
@@ -59,7 +59,8 @@ public class ContentView {
 
     private static final Document PROGRESS_DOCUMENT = EditorFactory.getInstance().createDocument("Rendering...");
 
-    private static final Map<String, String> MIME_TYPE_MAPPINGS = ImmutableMap.of(
+    @SuppressWarnings("StaticCollection")
+    private static final Map<String, String> MIME_TYPE_MAPPINGS = Map.of(
             "application/xhtml+xml", "application/xml",
             "application/atom+xml", "application/xml",
             "application/rss+xml", "application/xml",
@@ -110,7 +111,7 @@ public class ContentView {
     }
 
     @Nullable
-    public StructuredLogTreeModel.Body currentBody() {
+    StructuredLogTreeModel.Body currentBody() {
         return currentBody;
     }
 
@@ -128,6 +129,10 @@ public class ContentView {
             public void setSelected(@NotNull AnActionEvent e, boolean state) {
                 reformat(state);
             }
+            @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.EDT;
+            }
         };
         DumbAwareToggleAction softWrap = new DumbAwareToggleAction("Wrap Lines", null, AllIcons.Actions.ToggleSoftWrap) {
             @Override
@@ -137,6 +142,10 @@ public class ContentView {
             @Override
             public void setSelected(@NotNull AnActionEvent e, boolean state) {
                 getEditor().getSettings().setUseSoftWraps(state);
+            }
+            @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.EDT;
             }
         };
         if (console) {
