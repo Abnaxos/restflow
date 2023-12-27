@@ -27,6 +27,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotificationProvider;
 import net.netconomy.tools.restflow.integrations.idea.ConsoleProcessManager;
+import net.netconomy.tools.restflow.integrations.idea.lang.RfScriptType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +42,9 @@ public class RfConsoleEditorHeaderProvider implements EditorNotificationProvider
     public JComponent createNotificationPanel(@NotNull VirtualFile file,
                                               @NotNull FileEditor fileEditor,
                                               @NotNull Project project) {
+        if (!RfScriptType.isRestFlowFile(file, project)) {
+            return null;
+        }
         Editor editor = EditorUtil.getEditorEx(fileEditor);
         if (editor == null) {
             return null;

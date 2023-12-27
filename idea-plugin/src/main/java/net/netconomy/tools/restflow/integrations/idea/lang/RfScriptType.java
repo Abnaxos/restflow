@@ -1,7 +1,10 @@
 package net.netconomy.tools.restflow.integrations.idea.lang;
 
+import java.util.Optional;
+
 import javax.swing.Icon;
 
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -9,6 +12,8 @@ import com.intellij.psi.PsiManager;
 import icons.JetgroovyIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.groovy.GroovyFileType;
+import org.jetbrains.plugins.groovy.GroovyLanguage;
 import org.jetbrains.plugins.groovy.extensions.GroovyRunnableScriptType;
 import org.jetbrains.plugins.groovy.runner.GroovyScriptRunner;
 import org.jetbrains.plugins.groovy.runner.GroovyScriptUtil;
@@ -39,10 +44,17 @@ public final class RfScriptType extends GroovyRunnableScriptType {
     }
 
     public static boolean isRestFlowFile(VirtualFile file, Project project) {
-        PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-        if (psiFile == null) {
-            return false;
-        }
-        return GroovyScriptUtil.isSpecificScriptFile(psiFile, RfScriptType.INSTANCE);
+        return Optional.of(file.getFileType())
+          .filter(LanguageFileType.class::isInstance)
+          .map(LanguageFileType.class::cast)
+          .filter(t -> t.getLanguage().equals(GroovyLanguage.INSTANCE))
+          .map(t -> {
+              PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+              if (psiFile == null) {
+                  return false;
+              }
+              return GroovyScriptUtil.isSpecificScriptFile(psiFile, RfScriptType.INSTANCE);
+          })
+          .orElse(false);
     }
 }
