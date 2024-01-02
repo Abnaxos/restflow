@@ -9,9 +9,11 @@ import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpRequestBase
+import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
+import org.apache.http.protocol.BasicHttpContext
 
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -74,7 +76,10 @@ final class RequestExecution {
             }
             request.entity = entity
         }
-        return httpBackend.execute(request).withCloseable {HttpResponse resp ->
+        def httpContext = new BasicHttpContext()
+        httpContext.setAttribute(HttpClientContext.COOKIE_STORE,
+            flow.cookies.enabled ? flow.cookies.store : NoCookiesStore.INSTANCE)
+        return httpBackend.execute(request, httpContext).withCloseable {HttpResponse resp ->
             flow.log.recv resp.statusLine.statusCode,
                           HTTP.CodeNames.get(resp.statusLine.statusCode, '?'),
                           resp.statusLine.reasonPhrase

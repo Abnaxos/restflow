@@ -5,14 +5,11 @@ import org.apache.http.client.CookieStore
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.methods.*
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
-import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
 import org.apache.http.ssl.TrustStrategy
 
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLSession
 import java.awt.*
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -36,7 +33,13 @@ class RestFlow {
     private final ProfileLoader profileLoader
     private final CloseableHttpClient httpBackend
 
-    final CookieStore cookieStore = new BasicCookieStore()
+    final Cookies cookies = new Cookies()
+    /**
+     * @deprecated Use {@link #cookies} instead.
+     */
+    @Deprecated
+    final CookieStore cookieStore = cookies.store
+
     /**
      * A list of {@link PreRequestHandler}s that may modify the request
      * configuration before each HTTP request.
@@ -94,7 +97,7 @@ class RestFlow {
                         setCookieSpec(CookieSpecs.STANDARD).
                         build()).
                 disableRedirectHandling().
-                setDefaultCookieStore(cookieStore).
+                setDefaultCookieStore(NoCookiesStore.INSTANCE).
                 addInterceptorLast(new LogRequestInterceptor(this)).
                 build()
         reset()
@@ -107,7 +110,7 @@ class RestFlow {
         if (GLOBAL == null) {
             synchronized (GLOBAL_LOCK) {
                 if (GLOBAL == null) {
-                    GLOBAL = new RestFlow()
+                    GLOBAL = new RestFlow(null)
                 }
             }
         }
@@ -149,7 +152,7 @@ class RestFlow {
      * Reset the RESTflow instance to the default state, clear all customisations.
      */
     void reset() {
-        cookieStore.clear()
+        cookies.store.clear()
         ext.clear()
         defaultResponseCharset = StandardCharsets.UTF_8
         request = new RequestConfig()
