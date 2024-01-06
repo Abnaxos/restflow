@@ -80,8 +80,7 @@ final class RequestExecution {
         httpContext.setAttribute(HttpClientContext.COOKIE_STORE,
             flow.cookies.enabled ? flow.cookies.store : NoCookiesStore.INSTANCE)
         return httpBackend.execute(request, httpContext).withCloseable {HttpResponse resp ->
-            flow.log.recv resp.statusLine.statusCode,
-                          HTTP.CodeNames.get(resp.statusLine.statusCode, '?'),
+            flow.log.recv "$resp.statusLine.statusCode ${HTTP.CodeNames.get(resp.statusLine.statusCode, '?')}:",
                           resp.statusLine.reasonPhrase
             resp.allHeaders.each { h ->
                 flow.log.recv h.name + ':', h.value
