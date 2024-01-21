@@ -26,6 +26,11 @@ class PrintCommLog implements CommLog {
     }
 
     @Override
+    void pin(Object... msg) {
+        print('==>', msg)
+    }
+
+    @Override
     void sendBody(HttpBody body) {
         logBody(body, false, this.&send)
     }

@@ -32,6 +32,10 @@ public final class LogLine {
             return new LogLine(Channel.HTTP_OUT, line.substring(1));
         case Interface.PREFIX_OUT_HTTP_IN:
             return new LogLine(Channel.HTTP_IN_OK, line.substring(1));
+        case Interface.PREFIX_PIN:
+            return new LogLine(Channel.PIN, line.substring(1));
+        case Interface.PREFIX_ACTIVITY:
+            return new LogLine(Channel.ACTIVITY, line.substring(1));
         default:
             return new LogLine(Channel.UNKNOWN, line);
         }
@@ -82,6 +86,8 @@ public final class LogLine {
         SCRIPT,
         INFO,
         ERROR,
+        ACTIVITY,
+        PIN,
         HTTP_OUT,
         HTTP_IN_OK,
         HTTP_IN_ERR,

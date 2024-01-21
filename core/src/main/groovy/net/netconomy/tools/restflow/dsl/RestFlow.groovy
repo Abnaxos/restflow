@@ -478,6 +478,13 @@ class RestFlow {
         response = RequestExecution.execute(httpBackend, createRequest.call(), this, request)
     }
 
+    String activity(Object... msg) {
+        log.activity(msg)
+    }
+
+    String pin(Object... msg) {
+        log.pin(msg)
+    }
 
     /**
      * Retrieve a password. This will first try to retrieve the password

@@ -213,15 +213,14 @@ public class ContentView {
         Fold bodyRegion = null;
         int lineCount = 0;
         for (LogLine line : node.log) {
-            lineCount++;
-            String text = line.text() + "\n";
-            int start = doc.getTextLength();
             ConsoleViewContentType type = null;
             switch (line.channel()) {
             case CONSOLE:
                 type = RfConsoleView.CONSOLE_OUTPUT;
                 break;
             case INFO:
+            case PIN:
+            case ACTIVITY:
                 type = ConsoleViewContentType.NORMAL_OUTPUT;
                 break;
             case ERROR:
@@ -246,6 +245,9 @@ public class ContentView {
             if (type == null) {
                 continue;
             }
+            lineCount++;
+            String text = line.text() + "\n";
+            int start = doc.getTextLength();
             int prevOffset = doc.getTextLength();
             doc.insertString(start, text);
             if (line.channel().isHttp()) {
@@ -269,7 +271,7 @@ public class ContentView {
         if (hyperlinks == null) {
             hyperlinks = new EditorHyperlinkSupport(getEditor(), project);
         }
-        hyperlinks.highlightHyperlinks(filters, 0, lineCount);
+        hyperlinks.highlightHyperlinks(filters, 0, lineCount); // @deprecated use {@link #highlightHyperlinksLater} instead
         FoldingModelEx foldingModel = getEditor().getFoldingModel();
         foldingModel.runBatchFoldingOperation(() ->
                 foldings.forEach(f -> {

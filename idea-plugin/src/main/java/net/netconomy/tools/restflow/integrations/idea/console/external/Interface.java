@@ -19,6 +19,8 @@ public class Interface {
 
     public static final char PREFIX_SCRIPT = '+';
     public static final char PREFIX_RUN = '.';
+    public static final char PREFIX_ACTIVITY = '%';
+    public static final char PREFIX_PIN = '#';
     public static final char PREFIX_OUT_HTTP_OUT = '>';
     public static final char PREFIX_OUT_HTTP_IN = '<';
     public static final char PREFIX_OUT_STDOUT = '|';

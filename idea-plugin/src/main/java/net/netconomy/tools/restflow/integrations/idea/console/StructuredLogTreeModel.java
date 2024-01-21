@@ -51,6 +51,8 @@ public class StructuredLogTreeModel implements TreeModel {
     static final Icon REQ_ERROR = AllIcons.RunConfigurations.TestState.Yellow2;
     static final Icon REQ_WARN = AllIcons.RunConfigurations.TestState.Yellow2;
     static final Icon REQ_EXCEPT = AllIcons.RunConfigurations.TestState.Red2;
+    static final Icon LOG_ACTIVITY = AllIcons.Debugger.Console;
+    static final Icon LOG_PIN = AllIcons.General.Information;
 
     @Override
     public RootNode getRoot() {
@@ -264,9 +266,9 @@ public class StructuredLogTreeModel implements TreeModel {
         }
     }
 
-    class GroupNode extends Node<RootNode, RequestNode> {
+    class GroupNode extends Node<RootNode, ActivityNode<?>> {
 
-        private Optional<RequestNode> currentRequest = Optional.empty();
+        private Optional<ActivityNode<?>> currentActivity = Optional.empty();
         private String uri = "null:";
 
         GroupNode(RootNode parent) {
@@ -310,25 +312,42 @@ public class StructuredLogTreeModel implements TreeModel {
                         state(State.EXCEPT, GROUP_ICON_EXCEPT);
                         break;
                     }
-                    currentRequest = Optional.empty();
+                    currentActivity = Optional.empty();
                 } else if (line.text().startsWith(Interface.RUN_OUT_ERROR)) {
                     state(State.ERROR, GROUP_ICON_EXCEPT);
                     lastChild().ifPresent(Node::end);
-                    currentRequest = Optional.empty();
+                    currentActivity = Optional.empty();
                 }
-            } if (line.channel() == LogLine.Channel.HTTP_OUT && currentRequest.map(RequestNode::sent).orElse(true)) {
-                currentRequest.ifPresent(Node::end);
-                appendChild(currentRequest = Optional.of(new RequestNode(this)));
             }
-            if (currentRequest.isPresent()) {
-                currentRequest.get().appendLogLine(line);
+            if (line.channel() == LogLine.Channel.HTTP_OUT && !currentActivity.map(ActivityNode::expectingRequestData).orElse(false)) {
+                appendActivity(new RequestNode(this));
+            } else if (line.channel() == LogLine.Channel.PIN) {
+                appendActivity(new PinNode(this, line.text()));
+            }
+            if (currentActivity.isPresent()) {
+                currentActivity.get().appendLogLine(line);
             } else {
                 super.appendLogLine(line);
             }
         }
+
+        void appendActivity(ActivityNode<?> node) {
+            currentActivity.ifPresent(Node::end);
+            currentActivity = Optional.of(node);
+            appendChild(node);
+        }
     }
 
-    class RequestNode extends Node<GroupNode, RequestNode> {
+    abstract class ActivityNode<T extends ActivityNode<?>> extends Node<GroupNode, T> {
+        ActivityNode(@Nullable GroupNode parent) {
+            super(parent, true);
+        }
+        boolean expectingRequestData() {
+            return false;
+        }
+    }
+
+    class RequestNode extends ActivityNode<RequestNode> {
 
         private boolean sent = false;
 
@@ -350,7 +369,7 @@ public class StructuredLogTreeModel implements TreeModel {
         private HttpCode httpCode = null;
 
         RequestNode(GroupNode parent) {
-            super(parent, true);
+            super(parent);
             state(State.RUNNING, REQ_RUNNING);
         }
 
@@ -444,6 +463,11 @@ public class StructuredLogTreeModel implements TreeModel {
             return body != null;
         }
 
+        @Override
+        boolean expectingRequestData() {
+            return !sent();
+        }
+
         boolean sent() {
             return sent;
         }
@@ -471,10 +495,18 @@ public class StructuredLogTreeModel implements TreeModel {
         }
     }
 
+    class PinNode extends ActivityNode<PinNode> {
+        PinNode(@Nullable GroupNode parent, String text) {
+            super(parent);
+            text(text);
+            state(State.OK, LOG_PIN);
+        }
+    }
+
     static class BodyReadState {
 
         private static final String BODY_TEXT_START = "BODY TEXT ";
-        public static final String BODY_BINARY_START = "BODY BINARY ";
+        private static final String BODY_BINARY_START = "BODY BINARY ";
 
         private final LogLine.Channel channel;
         private final String mimeType;

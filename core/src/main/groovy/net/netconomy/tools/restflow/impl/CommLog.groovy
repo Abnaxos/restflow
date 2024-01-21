@@ -12,6 +12,9 @@ interface CommLog {
 
     void warn(Object... msg)
 
+    default void activity(Object... msg) {info(msg)}
+    default void pin(Object... msg) {info(msg)}
+
     void send(Object... msg)
 
     void sendBody(HttpBody body)

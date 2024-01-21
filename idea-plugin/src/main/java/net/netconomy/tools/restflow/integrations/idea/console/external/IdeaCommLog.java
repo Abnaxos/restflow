@@ -50,6 +50,16 @@ final class IdeaCommLog implements CommLog {
     }
 
     @Override
+    public void activity(Object... msg) {
+        print(Interface.PREFIX_ACTIVITY, msg);
+    }
+
+    @Override
+    public void pin(Object... msg) {
+        print(Interface.PREFIX_PIN, msg);
+    }
+
+    @Override
     public void send(Object... msg) {
         print(Interface.PREFIX_OUT_HTTP_OUT, msg);
     }
