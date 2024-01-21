@@ -478,11 +478,38 @@ class RestFlow {
         response = RequestExecution.execute(httpBackend, createRequest.call(), this, request)
     }
 
-    String activity(Object... msg) {
+    /**
+     * Announce some activity. This is mainly used for the IDEA plugin. The last logged
+     * activity will be shown in the log tree and whenever another nodes is appended,
+     * the activity will be removed. This is useful to inform the user that the script
+     * is doing something other than HTTP (a classic example would be a countdown).
+     *
+     * Example:
+     *
+     * <pre>
+     * GET('...')
+     * (5..1).each {activity "Continuing in $it s"; sleep 1000}
+     * GET('...')
+     * </pre>
+     */
+    void activity(Object... msg) {
         log.activity(msg)
     }
 
-    String pin(Object... msg) {
+    /**
+     * Pin some information. This is mainly used for the IDEA plugin. The information
+     * will be shown as a node in the request tree. This way, you can point out some
+     * fact that you/the user is probably most interested in, e.g. the amount of
+     * search results.
+     *
+     * Example:
+     *
+     * <pre>
+     * GET('search', q: 'test')
+     * pin "Found ${result.json.results?.size()} items"
+     * </pre>
+     */
+    void pin(Object... msg) {
         log.pin(msg)
     }
 
