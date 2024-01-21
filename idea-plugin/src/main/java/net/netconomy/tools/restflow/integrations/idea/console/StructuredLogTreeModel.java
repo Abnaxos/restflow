@@ -32,8 +32,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class StructuredLogTreeModel implements TreeModel {
+class StructuredLogTreeModel implements TreeModel {
 
+    @SuppressWarnings("StaticCollection")
     private static final Set<String> HTTP_METHODS = ImmutableSet.of(
             "GET", "POST", "PUT", "DELETE", "OPTIONS", "TRACE");
 
@@ -42,11 +43,11 @@ public class StructuredLogTreeModel implements TreeModel {
     private final TreeModelListenerList listeners = new TreeModelListenerList();
     // globe: AllIcons.Javaee.WebService;
     static final Icon GROUP_ICON_BASE = JetgroovyIcons.Groovy.GroovyFile; // or AllIcons.Nodes.WebFolder
-    static final Icon GROUP_ICON_RUNNING = new LayeredIcon(GROUP_ICON_BASE, AllIcons.Nodes.RunnableMark);
+    static final Icon GROUP_ICON_RUNNING = LayeredIcon.create(GROUP_ICON_BASE, AllIcons.Nodes.RunnableMark);
     static final Icon GROUP_ICON_OK = GROUP_ICON_BASE;
-    static final Icon GROUP_ICON_WARN = new LayeredIcon(GROUP_ICON_BASE, AllIcons.General.WarningDecorator);
-    static final Icon GROUP_ICON_ERROR = new LayeredIcon(GROUP_ICON_BASE, AllIcons.General.WarningDecorator);
-    static final Icon GROUP_ICON_EXCEPT = new LayeredIcon(GROUP_ICON_BASE, AllIcons.Nodes.ErrorMark);
+    static final Icon GROUP_ICON_WARN = LayeredIcon.create(GROUP_ICON_BASE, AllIcons.General.WarningDecorator);
+    static final Icon GROUP_ICON_ERROR = LayeredIcon.create(GROUP_ICON_BASE, AllIcons.General.WarningDecorator);
+    static final Icon GROUP_ICON_EXCEPT = LayeredIcon.create(GROUP_ICON_BASE, AllIcons.Nodes.ErrorMark);
     static final Icon REQ_RUNNING = AllIcons.RunConfigurations.TestState.Run_run;
     static final Icon REQ_OK = AllIcons.RunConfigurations.TestState.Green2;
     static final Icon REQ_ERROR = AllIcons.RunConfigurations.TestState.Yellow2;
@@ -62,17 +63,17 @@ public class StructuredLogTreeModel implements TreeModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((Node)parent).children.get(index);
+        return ((Node<?, ?>)parent).children.get(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return ((Node)parent).children.size();
+        return ((Node<?, ?>)parent).children.size();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        return ((Node)node).leaf;
+        return ((Node<?, ?>)node).leaf;
     }
 
     @Override
@@ -83,7 +84,7 @@ public class StructuredLogTreeModel implements TreeModel {
     @Override
     public int getIndexOfChild(Object parent, Object child) {
         //noinspection RedundantCast
-        return ((Node)parent).children.indexOf((Node)child);
+        return ((Node<?, ?>)parent).children.indexOf((Node<?, ?>)child);
     }
 
     public Stream<Node<?, ?>> breathFirst() {
@@ -108,7 +109,7 @@ public class StructuredLogTreeModel implements TreeModel {
         RUNNING, OK, WARN, ERROR, EXCEPT
     }
 
-    abstract class Node<P extends Node, C extends Node> {
+    abstract class Node<P extends Node<?, ?>, C extends Node<?, ?>> {
 
         private final List<ChangeListener> changeListeners = new LinkedList<>();
 
@@ -145,13 +146,13 @@ public class StructuredLogTreeModel implements TreeModel {
             return icon;
         }
 
-        Node text(String text) {
+        Node<?, ?> text(String text) {
             this.text = text;
             fireTreeNodeChange();
             return this;
         }
 
-        Node state(State state, Icon icon) {
+        Node<?, ?> state(State state, Icon icon) {
             this.state = state;
             this.icon = icon;
             fireTreeNodeChange();
@@ -244,7 +245,7 @@ public class StructuredLogTreeModel implements TreeModel {
         }
 
         Object[] treePath() {
-            Node n = this;
+            Node<?, ?> n = this;
             int count = 1;
             while (n.parent != null) {
                 n = n.parent;
