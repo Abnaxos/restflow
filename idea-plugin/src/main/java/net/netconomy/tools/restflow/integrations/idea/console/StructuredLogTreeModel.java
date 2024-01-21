@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -172,6 +173,15 @@ public class StructuredLogTreeModel implements TreeModel {
                     new int[] {index}, new Object[] {child}));
         }
 
+        void removeChild(C child) {
+            int index = children.indexOf(child);
+            if (index >= 0) {
+                children.remove(index);
+                listeners.treeNodesRemoved(new TreeModelEvent(StructuredLogTreeModel.this, treePath(),
+                  new int[] {index}, new Object[] {child}));
+            }
+        }
+
         void appendChild(Optional<? extends C> child) {
             child.ifPresent(this::appendChild);
         }
@@ -185,6 +195,10 @@ public class StructuredLogTreeModel implements TreeModel {
         }
 
         void appendLogLine(LogLine line) {
+            appendLogLineRaw(line);
+        }
+
+        void appendLogLineRaw(LogLine line) {
             log.add(line);
             fireStateChange();
         }
@@ -323,6 +337,8 @@ public class StructuredLogTreeModel implements TreeModel {
                 appendActivity(new RequestNode(this));
             } else if (line.channel() == LogLine.Channel.PIN) {
                 appendActivity(new PinNode(this, line.text()));
+            } else if (line.channel() == LogLine.Channel.ACTIVITY && !currentActivity.map(VerboseActivityNode.class::isInstance).orElse(false)) {
+                appendActivity(new VerboseActivityNode(this, currentActivity.orElse(null), line.text()));
             }
             if (currentActivity.isPresent()) {
                 currentActivity.get().appendLogLine(line);
@@ -368,7 +384,7 @@ public class StructuredLogTreeModel implements TreeModel {
         @Nullable
         private HttpCode httpCode = null;
 
-        RequestNode(GroupNode parent) {
+        RequestNode(@NotNull GroupNode parent) {
             super(parent);
             state(State.RUNNING, REQ_RUNNING);
         }
@@ -496,10 +512,34 @@ public class StructuredLogTreeModel implements TreeModel {
     }
 
     class PinNode extends ActivityNode<PinNode> {
-        PinNode(@Nullable GroupNode parent, String text) {
+        PinNode(@NotNull GroupNode parent, String text) {
             super(parent);
             text(text);
             state(State.OK, LOG_PIN);
+        }
+    }
+
+    class VerboseActivityNode extends ActivityNode<VerboseActivityNode> {
+        private final Node<?, ?> tee;
+        VerboseActivityNode(@NotNull GroupNode parent, @Nullable Node<?, ?> tee, @NotNull String text) {
+            super(parent);
+            this.tee = Objects.requireNonNullElse(tee, parent);
+            text(text);
+            state(State.OK, LOG_ACTIVITY);
+        }
+        @Override
+        void appendLogLine(LogLine line) {
+            super.appendLogLine(line);
+            tee.appendLogLineRaw(line);
+            if (line.channel() == LogLine.Channel.ACTIVITY) {
+                text(line.text());
+            }
+        }
+        @Override
+        void end() {
+            super.end();
+            assert parent != null;
+            parent.removeChild(this);
         }
     }
 
