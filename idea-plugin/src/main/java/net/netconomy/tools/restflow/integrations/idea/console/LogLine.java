@@ -1,6 +1,6 @@
 package net.netconomy.tools.restflow.integrations.idea.console;
 
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import net.netconomy.tools.restflow.integrations.idea.console.adapter.Interface;
 import org.jetbrains.annotations.Nullable;
 
 

@@ -38,7 +38,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
 import net.netconomy.tools.restflow.integrations.idea.ConsoleProcessManager;
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import net.netconomy.tools.restflow.integrations.idea.console.adapter.Interface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -27,7 +27,7 @@ import com.intellij.ui.LayeredIcon;
 import com.intellij.util.Base64;
 import com.intellij.util.ui.tree.TreeModelListenerList;
 import icons.JetgroovyIcons;
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import net.netconomy.tools.restflow.integrations.idea.console.adapter.Interface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -2,6 +2,8 @@ apply plugin: 'org.jetbrains.intellij'
 
 ext.enableMavenPublishing = false
 
+def adapterPrj = project.project('console-adapter')
+
 intellij {
     pluginName = 'RESTflow'
     version = '233.11799.300' // 2023.3.1
@@ -21,6 +23,7 @@ java {
 
 dependencies {
     compileOnly project(':core')
+    implementation adapterPrj
 }
 
 idea.module {
@@ -37,16 +40,23 @@ dependencies {
 
 def shippedJarsBuildDir = file("$buildDir/shipped-jars")
 def shippedJarsPrefix = 'net/netconomy/tools/restflow/jars'
-task consoleJar(type: Jar) {
-    def classesDir = sourceSets.main.java.classesDirectory.get().asFile
-    dependsOn tasks.compileJava
+//task consoleJar(type: Jar) {
+//    def classesDir = sourceSets.main.java.classesDirectory.get().asFile
+//    dependsOn tasks.compileJava
+//    destinationDir = file("${sourceSets.main.output.resourcesDir}/$shippedJarsPrefix")
+//    archiveFileName = "console.jar"
+//    from(classesDir) {
+//        include "net/netconomy/tools/restflow/integrations/idea/console/external/**.class"
+//    }
+//}
+task adapterJar(type: Copy) {
+    dependsOn adapterPrj.tasks.jar
     destinationDir = file("${sourceSets.main.output.resourcesDir}/$shippedJarsPrefix")
-    archiveFileName = "console.jar"
-    from(classesDir) {
-        include "net/netconomy/tools/restflow/integrations/idea/console/external/**.class"
+    from(adapterPrj.tasks.jar.archivePath) {
+        rename('.*', 'console.jar')
     }
 }
-tasks.processResources.dependsOn tasks.consoleJar
+tasks.processResources.dependsOn tasks.adapterJar
 task collectRestflowJars(type: Sync) {
     dependsOn project(':core').build, project(':core').sourceJar
 

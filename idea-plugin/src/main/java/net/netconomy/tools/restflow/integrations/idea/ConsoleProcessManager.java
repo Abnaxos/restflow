@@ -36,7 +36,7 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.util.io.BaseOutputReader;
 import net.netconomy.tools.restflow.integrations.idea.console.ConsoleSettings;
 import net.netconomy.tools.restflow.integrations.idea.console.RfConsoleView;
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import net.netconomy.tools.restflow.integrations.idea.console.adapter.Interface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

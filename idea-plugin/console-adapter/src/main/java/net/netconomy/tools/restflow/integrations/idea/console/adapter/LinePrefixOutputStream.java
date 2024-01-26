@@ -1,4 +1,4 @@
-package net.netconomy.tools.restflow.integrations.idea.console.external;
+package net.netconomy.tools.restflow.integrations.idea.console.adapter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -50,7 +50,7 @@ import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeModelAdapter;
-import net.netconomy.tools.restflow.integrations.idea.console.external.Interface;
+import net.netconomy.tools.restflow.integrations.idea.console.adapter.Interface;
 import net.netconomy.tools.restflow.integrations.idea.util.StreamNavigation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
