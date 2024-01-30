@@ -68,7 +68,7 @@ class PrintCommLog implements CommLog {
     }
 
     private void print(String head, Object... msg) {
-        LINE_RE.split(msg.join(' ')).each {(out ?: System.out).println head + ' ' + it}
+        Util.splitMessage(msg).forEach {(out ?: System.out).println head + ' ' + it}
     }
 
     @Override

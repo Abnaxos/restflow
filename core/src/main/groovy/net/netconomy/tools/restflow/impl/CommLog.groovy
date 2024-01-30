@@ -1,4 +1,9 @@
 package net.netconomy.tools.restflow.impl
+
+import java.util.stream.Collectors
+import java.util.stream.Stream
+
+
 /**
  * @since 2018-10-18
  * @author Raffael Herzog (r.herzog@netconomy.net)
@@ -27,4 +32,13 @@ interface CommLog {
 
     CommLog getVerbose()
 
+    static class Util {
+        private Util() {}
+        private static LINE_RE = ~'(\n|\r\n?)'
+        static Stream<String> splitMessage(Object[] msg) {
+            Optional.ofNullable(msg)
+              .filter(a -> a.length > 0)
+              .map(a -> Stream.of(LINE_RE.split(Stream.of(a).map(String::valueOf).collect(Collectors.joining(" ")))))
+              .orElseGet(() -> Stream.of("<empty>"))        }
+    }
 }

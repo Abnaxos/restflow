@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.Base64;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.netconomy.tools.restflow.impl.CommLog;
@@ -115,11 +114,10 @@ final class IdeaCommLog implements CommLog {
     }
 
     private void print(char head, Object... msg) {
-        Stream.of(LINE_RE.split(Stream.of(msg).map(String::valueOf).collect(Collectors.joining(" "))))
-                .forEach(l -> {
-                    out.print(head);
-                    out.println(l);
-                });
+        Util.splitMessage(msg).forEach(l -> {
+            out.print(head);
+            out.println(l);
+        });
     }
 
     @Override
